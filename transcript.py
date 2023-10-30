@@ -28,22 +28,20 @@ class Transcript:
         self.deepl_key = deepl_key
         self.openai_key = openai_key
         self.transcript = None
+        self.audio_file = None
 
         self.spoken_lang = None
         self.device = "gpu" if torch.cuda.is_available() else "cpu"
 
-    def api_test(self):
-        return "Ye ye"
-
-    def get_transcript(self, audio_file, debug=False) -> dict:
+    def get_transcript(self, debug=False) -> dict:
         """Get transcript from audio file."""
         if self.transcript is not None:
             return self.transcript
-
+ 
         model = WhisperModel("base", device=self.device,
                              compute_type="int8")
 
-        segments, info = model.transcribe(audio_file, vad_filter=True)
+        segments, info = model.transcribe(self.audio_file, vad_filter=True)
         segments = list(segments)
 
         self.spoken_lang = info.language
