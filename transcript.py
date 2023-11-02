@@ -1,9 +1,9 @@
 import concurrent.futures
-from copy import deepcopy
+from typing import Dict, List
 import deepl
 import torch
 from faster_whisper import WhisperModel
-from faster_whisper.transcribe import Segment, Word
+from faster_whisper.transcribe import Segment
 
 from .utils import WriteVTT
 
@@ -11,14 +11,11 @@ class Transcript:
     """
     Init Object that creates transcript and summaries from audio files.
 
-    :param audio_file: The audio file
-    :type audio_file: str
-    :param api_key: The ap i key to access the OpenAI API
-    :type api_key: str
-
+    param deepl_key: The api key to access the DeepL API
+    :type deepl_key: str
     """
 
-    def __init__(self, openai_key, deepl_key) -> None:
+    def __init__(self, deepl_key) -> None:
         """Init function.
 
         @param audio_file : The audio filename
@@ -26,22 +23,20 @@ class Transcript:
         @param deepl_key : DeepL api key
         """
         self.deepl_key = deepl_key
-        self.openai_key = openai_key
         self.transcript = None
-        self.audio_file = None
 
         self.spoken_lang = None
         self.device = "gpu" if torch.cuda.is_available() else "cpu"
 
-    def get_transcript(self, debug=False) -> dict:
+
+    def get_transcript(self, audio_file, debug=False) -> Dict:
         """Get transcript from audio file."""
         if self.transcript is not None:
             return self.transcript
- 
+
         model = WhisperModel("base", device=self.device,
                              compute_type="int8")
-
-        segments, info = model.transcribe(self.audio_file, vad_filter=True)
+        segments, info = model.transcribe(audio_file, vad_filter=True)
         segments = list(segments)
 
         self.spoken_lang = info.language
@@ -53,18 +48,20 @@ class Transcript:
 
         if debug:
             print(segments)
-        self.transcript = dict({"segments": segments, "text": transcript, "info": info})
 
+        self.transcript = dict(
+            {"segments": segments, "text": transcript, "info": info})
         return self.transcript
 
-    def get_subtitles(self, transcript=None, given_segments=None, debug=False) -> list[dict]:
+    def get_subtitles(self, transcript=None, given_segments=None, debug=False) -> List[Dict]:
         """Get subtitles from audio in dict format.
 
         @param transcript : The transcript we are using (could be translated)
         @param given_segments : Translate segments instead of a transcript
+        @param debug : Print the transcript when there is an error
         """
         if transcript is None:
-            transcript = self.get_transcript()
+            transcript = self.get_transcript(debug)
         subtitles = []
         segments = transcript["segments"] if given_segments is None else given_segments
         for segment in segments:
@@ -76,7 +73,7 @@ class Transcript:
 
         return subtitles
 
-    def write_subtitles(self, filename: str, transcript=None, css_options=None) -> None:
+    def write_subtitles(self, audio_file,  filename: str, transcript=None, css_options=None) -> None:
         """Write subtitles to file in any standard format.
 
         @param transcript : The subtitles we are using
@@ -85,19 +82,21 @@ class Transcript:
         highlight words
         """
         if transcript is None:
-            transcript = self.get_transcript()
+            transcript = self.get_transcript(audio_file)
 
-        vttWriter = WriteVTT(transcript)
-        subs_file = open(filename, "w")
-        default_options = {"max_line_width": 28, "max_line_count": 3, "highlight_words": False}
+        vtt_writer = WriteVTT(transcript)
+        default_options = {"max_line_width": 28,
+                           "max_line_count": 3, "highlight_words": False}
         options = css_options if css_options is not None else default_options
-        vttWriter.write_result(transcript, subs_file, options)
+        with open(filename, "w", encoding="utf-8") as subs_file:
+            vtt_writer.write_result(transcript, subs_file, options)
 
     def translate_text(self, text: str, translator, out_lang: str) -> str:
         """
         Translate text to another language.
 
         @param text: The text to translate
+        @param translator: deepl object for translation
         @param out_lang: The requested language
         """
         return translator.translate_text(text, target_lang=out_lang.capitalize()).text
@@ -108,6 +107,7 @@ class Transcript:
 
         @param translator: DeepL translator object
         """
+
         def translate_sublist(self, sub: Segment, lang: str) -> dict:
             new_seg = Segment(
                 id=sub.id,
@@ -125,28 +125,30 @@ class Transcript:
             return new_seg
 
         res_transcript: dict = dict({"segments": []})
-        res_transcript["segments"] = list(map(lambda sub: translate_sublist(self, sub, lang), self.transcript["segments"]))
+        res_transcript["segments"] = list(map(lambda sub: translate_sublist(
+            self, sub, lang), self.transcript["segments"]))
         return res_transcript
 
-    def translate_subtitles(self, out_langs: list[str]) -> dict[dict]:
+    def translate_subtitles(self, audio_file, out_langs: list[str]) -> dict[dict]:
         """
         Translate the subtitles from the segment part of the transcript.
 
         @param out_langs: The list of languages wanted in ISO 639-1 standard
         """
         if self.transcript is None:
-            self.get_transcript()
+            self.get_transcript(audio_file)
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
             transcript_dict = {}
             translator = deepl.Translator(auth_key=self.deepl_key)
-            translate_batch = {executor.submit(self.translate_subtitle, translator, lang): lang for lang in out_langs}
+            translate_batch = {executor.submit(
+                self.translate_subtitle, translator, lang): lang for lang in out_langs}
             for future in concurrent.futures.as_completed(translate_batch):
                 lang = translate_batch[future]
                 try:
                     transcript = future.result()
                 except Exception as exc:
-                    print('%r generated an exception: %s' % (lang, exc))
+                    print(f'{lang} generated an exception: {exc}')
                 else:
                     transcript_dict[lang] = transcript
 

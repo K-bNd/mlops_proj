@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
+import os
 import json
+from urllib.request import urlopen
 from flask import Flask, request, jsonify, send_from_directory, redirect, flash
 from werkzeug.utils import secure_filename
 from api_app import transcript
-import os
-from urllib.request import urlopen
 
 ALLOWED_EXTENSIONS = {'mp3', 'm4a', 'mp4'}
 
@@ -15,10 +15,9 @@ def allowed_file(filename):
 
 def create_app():
     deepl_key = open("DEEPL_KEY.txt", "rb").readline().decode().rstrip()
-    openai_key = open("OPENAI_KEY.txt", "rb").readline().decode().rstrip()
     UPLOAD_FOLDER = '/upload_files'
 
-    obj = transcript.Transcript(openai_key, deepl_key)
+    obj = transcript.Transcript(deepl_key)
     app = Flask(__name__, instance_relative_config=True)
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.config['SECRET_KEY'] = 'dev'
