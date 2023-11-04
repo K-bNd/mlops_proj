@@ -5,7 +5,8 @@ import torch
 from faster_whisper import WhisperModel
 from faster_whisper.transcribe import Segment
 
-from .utils import WriteVTT
+from .subtitle_utils import WriteVTT
+
 
 class Transcript:
     """
@@ -26,8 +27,7 @@ class Transcript:
         self.transcript = None
 
         self.spoken_lang = None
-        self.device = "gpu" if torch.cuda.is_available() else "cpu"
-
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def get_transcript(self, audio_file, debug=False) -> Dict:
         """Get transcript from audio file."""
@@ -73,7 +73,7 @@ class Transcript:
 
         return subtitles
 
-    def write_subtitles(self, audio_file,  filename: str, transcript=None, css_options=None) -> None:
+    def write_subtitles(self, audio_file: str,  filename: str, transcript: dict = None, css_options: dict = None) -> None:
         """Write subtitles to file in any standard format.
 
         @param transcript : The subtitles we are using

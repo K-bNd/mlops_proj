@@ -2,23 +2,18 @@
 
 import os
 import json
-from urllib.request import urlopen
 from flask import Flask, request, jsonify, send_from_directory, redirect, flash
 from werkzeug.utils import secure_filename
-from api_app import transcript
+from api_app import app_utils, transcript
 
-ALLOWED_EXTENSIONS = {'mp3', 'm4a', 'mp4'}
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[-1].lower() in ALLOWED_EXTENSIONS
 
 def create_app():
-    deepl_key = open("DEEPL_KEY.txt", "rb").readline().decode().rstrip()
-    UPLOAD_FOLDER = '/upload_files'
-
-    obj = transcript.Transcript(deepl_key)
     app = Flask(__name__, instance_relative_config=True)
+
+    DEEPL_KEY = open("DEEPL_KEY.txt", "rb").readline().decode().rstrip()
+    UPLOAD_FOLDER = os.path.join(app.root_path, 'upload_files')
+
+    obj = transcript.Transcript(DEEPL_KEY)
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.config['SECRET_KEY'] = 'dev'
 
@@ -29,32 +24,52 @@ def create_app():
     @app.route('/transcript', methods=['GET'])
     def get_transcript():
         params = request.get_json()
-        if not "audio_file" in list(params.keys()):
-            flash('No audio file given')
+        if "file" not in list(params.keys()):
+            flash('No file given')
             return redirect(request.url)
-        if not allowed_file(params["audio_file"]):
-            print(request.get_json()["audio_file"])
+
+        if not app_utils.allowed_extension(params["file"]):
+            print(request.get_json()["file"])
             flash('Unallowed extension for audio file')
             return redirect(request.url)
-        return "Downloading from " + params["audio_file"]
 
-        # obj.audio_file = os.path.join(app.config['UPLOAD_FOLDER'], params["audio_file"])
-        # file.save(obj.audio_file)
-        # return obj.get_transcript()
+        url = request.get_json()["file"]
+        filename = UPLOAD_FOLDER + url.rsplit('/', maxsplit=1)[-1]
 
-    @app.route('/subtitles', methods=['GET', 'PUT'])
+        app_utils.download_file(url, filename)
+        res = obj.get_transcript(filename)["text"]
+        os.remove(filename)
+        return res
+
+    @app.route('/subtitles', methods=['GET'])
     def write_subtitles():
-        if 'file' not in request.files:
-            flash('No file part')
+        params = request.get_json()
+        if "file" not in list(params.keys()):
+            flash('No file given')
             return redirect(request.url)
-        file = request.files['file']
-        params = json.loads(request.data)
-        audio_file = params["audio_file"]
-        filename = secure_filename(params["filename"])
-        obj.write_subtitles(filename, params["transcript"], params["css_options"])
-        return download_file(params["filename"])
+
+        if not app_utils.allowed_extension(params["file"]):
+            print(params["file"])
+            flash('Unallowed extension for audio file')
+            return redirect(request.url)
+
+        url = params["file"]
+        filename = os.path.join(UPLOAD_FOLDER, url.rsplit('/', maxsplit=1)[-1])
+        print(filename)
+        subtitles_src = ".".join(filename.split('.')[0:-1]) + "-subtitles.vtt"
+
+        app_utils.download_file(url, filename)
+
+        obj.write_subtitles(
+            filename, subtitles_src)
+        os.remove(filename)
+        
+        return send_from_directory(app.config['UPLOAD_FOLDER'],
+                               subtitles_src.rsplit('/', maxsplit=1)[-1], as_attachment=True)
+
     @app.route('/uploads/<path:filename>')
     def download_file(filename):
+        print(app.config["UPLOAD_FOLDER"])
         return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename, as_attachment=True)
+                                   filename, as_attachment=True)
     return app
