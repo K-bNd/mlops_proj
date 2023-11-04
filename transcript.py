@@ -5,8 +5,7 @@ import torch
 from faster_whisper import WhisperModel
 from faster_whisper.transcribe import Segment
 
-from .subtitle_utils import WriteVTT
-
+from subtitle_utils import WriteVTT
 
 class Transcript:
     """
