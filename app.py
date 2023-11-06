@@ -20,7 +20,6 @@ app.mount("/upload_files", StaticFiles(directory="./upload_files"),
 
 obj = Transcript(settings.deepl_key)
 
-
 class Param(BaseModel):
     """Define param class"""
     file: str
@@ -30,7 +29,6 @@ class Param(BaseModel):
 def root():
     """Show home page."""
     return "Welcome page."
-
 
 @app.get('/transcript')
 def get_transcript(request: Request, param: Param):
@@ -54,14 +52,12 @@ def get_transcript(request: Request, param: Param):
 def write_subtitles(request: Request, param: Param):
     """Write subtitles for file"""
     if not allowed_extension(param.file):
-        print(param.file)
         err = BackgroundTask(
             flash, request, "Unallowed extension for audio file")
         return RedirectResponse(url="/", status_code=302, background=err)
 
     filename = os.path.join(settings.upload_folder,
                             param.file.rsplit('/', maxsplit=1)[-1])
-    print(filename)
     subtitles_src = ".".join(filename.split('.')[0:-1]) + "-subtitles.vtt"
 
     download_file(param.file, filename)
@@ -69,9 +65,4 @@ def write_subtitles(request: Request, param: Param):
     obj.write_subtitles(
         filename, subtitles_src)
     os.remove(filename)
-    print(subtitles_src)
     return subtitles_src
-
-if __name__ == "__main__":
-    print("test")
-    app.run(host='0.0.0.0', port=5000, debug=True)
