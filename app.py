@@ -30,7 +30,7 @@ class Param(BaseModel):
 @app.get('/')
 def root() -> FileResponse:
     """Show home page."""
-    return FileResponse(path="/static/index.html", media_type="text/html")
+    return FileResponse(path="./static/index.html", media_type="text/html")
 
 @app.get('/transcript')
 def get_transcript(request: Request, param: Param):
