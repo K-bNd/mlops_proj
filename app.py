@@ -17,6 +17,8 @@ app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 
 app.mount("/upload_files", StaticFiles(directory="./upload_files"),
           name="upload_files")
+app.mount("/static", StaticFiles(directory="./static"),
+          name="static")
 
 obj = Transcript(settings.deepl_key)
 
@@ -26,9 +28,9 @@ class Param(BaseModel):
 
 
 @app.get('/')
-def root():
+def root() -> FileResponse:
     """Show home page."""
-    return "Welcome page."
+    return FileResponse(path="/static/index.html", media_type="text/html")
 
 @app.get('/transcript')
 def get_transcript(request: Request, param: Param):
