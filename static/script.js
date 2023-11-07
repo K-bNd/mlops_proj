@@ -1,7 +1,7 @@
 const textGenForm = document.querySelector(".whisper-gen-form");
 
 const get_transcript = async (text) => {
-  const inferResponse = await fetch(`transcript`, {
+  const inferResponse = await fetch(`/transcript`, {
     method: "GET",
     body: {"file": text}, 
   });
