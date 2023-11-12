@@ -7,7 +7,7 @@ from starlette.background import BackgroundTask
 from starlette.middleware.sessions import SessionMiddleware
 from pydantic import BaseModel
 
-from app_utils import Settings, allowed_extension, download_file, flash
+from app_utils import Settings, allowed_extension, download_file, download_file_obj, flash
 from transcript import Transcript
 
 app = FastAPI()
@@ -67,6 +67,24 @@ def write_subtitles(request: Request, param: Param):
     obj.write_subtitles(
         filename, subtitles_src)
     os.remove(filename)
+    return subtitles_src
+
+@app.get('/subtitles_test', response_class=FileResponse)
+def write_subtitles(file: UploadFile):
+    """Write subtitles for file"""
+    if not allowed_extension(file.filename):
+        err = BackgroundTask(
+            flash, request, "Unallowed extension for audio file")
+        return RedirectResponse(url="/", status_code=302, background=err)
+
+    filename = os.path.join(settings.upload_folder, file.filename)
+    subtitles_src = ".".join(filename.split('.')[0:-1]) + "-subtitles.vtt"
+
+    # download_file(param.file, filename)
+
+    obj.write_subtitles(
+        file.file, subtitles_src)
+    # os.remove(filename)
     return subtitles_src
 
 @app.get('/test')

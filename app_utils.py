@@ -18,7 +18,8 @@ def download_file(url: str, filename: str) -> None:
 
 def download_file_obj(file: UploadFile) -> None:
     """Downloads a file from UploadFile into a file."""
-    with open(file.filename, 'wb') as f:
+    settings = Settings()
+    with open(os.path.join(settings.upload_folder, file.filename), 'wb') as f:
             copyfileobj(file.file, f)
 
 class Settings(BaseSettings):
