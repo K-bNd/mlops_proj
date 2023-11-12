@@ -49,6 +49,15 @@ def get_transcript(request: Request, param: Param):
     os.remove(filename)
     return res
 
+@app.get('/transcript_obj')
+def get_transcript_obj(request: Request, file: UploadFile):
+    """Get transcript"""
+    if not allowed_extension(file.filename):
+        err = BackgroundTask(
+            flash, request, "Unallowed extension for audio file")
+        return RedirectResponse(url="/", status_code=302, background=err)
+
+    return obj.get_transcript(file.file)["text"]
 
 @app.get('/subtitles', response_class=FileResponse)
 def write_subtitles(request: Request, param: Param):
@@ -69,8 +78,8 @@ def write_subtitles(request: Request, param: Param):
     os.remove(filename)
     return subtitles_src
 
-@app.get('/subtitles_test', response_class=FileResponse)
-def write_subtitles(file: UploadFile):
+@app.get('/subtitles_obj', response_class=FileResponse)
+def write_subtitles_obj(request: Request, file: UploadFile):
     """Write subtitles for file"""
     if not allowed_extension(file.filename):
         err = BackgroundTask(
@@ -80,14 +89,6 @@ def write_subtitles(file: UploadFile):
     filename = os.path.join(settings.upload_folder, file.filename)
     subtitles_src = ".".join(filename.split('.')[0:-1]) + "-subtitles.vtt"
 
-    # download_file(param.file, filename)
-
     obj.write_subtitles(
         file.file, subtitles_src)
-    # os.remove(filename)
     return subtitles_src
-
-@app.get('/test')
-async def get_upload_file(file: UploadFile):
-    download_file_obj(file)
-    return {"filename": file.filename}
