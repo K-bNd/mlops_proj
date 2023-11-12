@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, File, UploadFile
 from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.background import BackgroundTask
@@ -68,3 +68,7 @@ def write_subtitles(request: Request, param: Param):
         filename, subtitles_src)
     os.remove(filename)
     return subtitles_src
+
+@app.get('/test')
+async def get_upload_file(file: UploadFile):
+    return {"filename": file.filename}
