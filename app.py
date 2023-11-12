@@ -33,23 +33,6 @@ def root() -> FileResponse:
     return FileResponse(path="./static/index.html", media_type="text/html")
 
 @app.get('/transcript')
-def get_transcript(request: Request, param: Param):
-    """Get transcript"""
-    if not allowed_extension(param.file):
-        print(param.file)
-        err = BackgroundTask(
-            flash, request, "Unallowed extension for audio file")
-        return RedirectResponse(url="/", status_code=302, background=err)
-
-    filename = os.path.join(settings.upload_folder,
-                            param.file.rsplit('/', maxsplit=1)[-1])
-
-    download_file(param.file, filename)
-    res = obj.get_transcript(filename)["text"]
-    os.remove(filename)
-    return res
-
-@app.get('/transcript_obj')
 def get_transcript_obj(request: Request, file: UploadFile):
     """Get transcript"""
     if not allowed_extension(file.filename):
@@ -60,25 +43,6 @@ def get_transcript_obj(request: Request, file: UploadFile):
     return obj.get_transcript(file.file)["text"]
 
 @app.get('/subtitles', response_class=FileResponse)
-def write_subtitles(request: Request, param: Param):
-    """Write subtitles for file"""
-    if not allowed_extension(param.file):
-        err = BackgroundTask(
-            flash, request, "Unallowed extension for audio file")
-        return RedirectResponse(url="/", status_code=302, background=err)
-
-    filename = os.path.join(settings.upload_folder,
-                            param.file.rsplit('/', maxsplit=1)[-1])
-    subtitles_src = ".".join(filename.split('.')[0:-1]) + "-subtitles.vtt"
-
-    download_file(param.file, filename)
-
-    obj.write_subtitles(
-        filename, subtitles_src)
-    os.remove(filename)
-    return subtitles_src
-
-@app.get('/subtitles_obj', response_class=FileResponse)
 def write_subtitles_obj(request: Request, file: UploadFile):
     """Write subtitles for file"""
     if not allowed_extension(file.filename):

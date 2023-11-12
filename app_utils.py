@@ -4,10 +4,11 @@ from shutil import copyfileobj
 from pydantic_settings import BaseSettings
 from fastapi import Request, UploadFile
 
-ALLOWED_EXTENSIONS = {'mp3', 'm4a', 'mp4'}
+ALLOWED_EXTENSIONS = {'mp3', 'm4a', 'mp4', 'mov'}
 
 def allowed_extension(filename: str) -> bool:
     """Check if the extension from the uploaded file is valid."""
+    print(filename)
     return '.' in filename and \
            filename.rsplit('.', 1)[-1].lower() in ALLOWED_EXTENSIONS
 
