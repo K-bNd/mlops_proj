@@ -2,7 +2,7 @@ import os
 from urllib.request import urlopen
 from shutil import copyfileobj
 from pydantic_settings import BaseSettings
-from fastapi import Request
+from fastapi import Request, UploadFile
 
 ALLOWED_EXTENSIONS = {'mp3', 'm4a', 'mp4'}
 
@@ -11,8 +11,13 @@ def allowed_extension(filename: str) -> bool:
     return '.' in filename and \
            filename.rsplit('.', 1)[-1].lower() in ALLOWED_EXTENSIONS
 
-def download_file(file: UploadFile) -> None:
+def download_file(url: str, filename: str) -> None:
     """Downloads a file from url into a file."""
+    with urlopen(url) as in_stream, open(filename, 'wb+') as out_file:
+            copyfileobj(in_stream, out_file)
+
+def download_file_obj(file: UploadFile) -> None:
+    """Downloads a file from UploadFile into a file."""
     with open(file.filename, 'wb') as f:
             copyfileobj(file.file, f)
 
