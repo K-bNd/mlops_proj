@@ -71,4 +71,5 @@ def write_subtitles(request: Request, param: Param):
 
 @app.get('/test')
 async def get_upload_file(file: UploadFile):
+    download_file(file)
     return {"filename": file.filename}

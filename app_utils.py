@@ -11,10 +11,10 @@ def allowed_extension(filename: str) -> bool:
     return '.' in filename and \
            filename.rsplit('.', 1)[-1].lower() in ALLOWED_EXTENSIONS
 
-def download_file(url: str, filename: str) -> None:
+def download_file(file: UploadFile) -> None:
     """Downloads a file from url into a file."""
-    with urlopen(url) as in_stream, open(filename, 'wb+') as out_file:
-            copyfileobj(in_stream, out_file)
+    with open(file.filename, 'wb') as f:
+            copyfileobj(file.file, f)
 
 class Settings(BaseSettings):
     """
