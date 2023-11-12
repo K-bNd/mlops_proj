@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     `export FASTR_SECRET_KEY=secret`
     """
     secret_key: str = "dev"
-    deepl_key: str = os.environ.get("DEEPL_KEY")
+    deepl_key: str = os.environ.get("DEEPL_KEY", "")
     upload_folder: str = "./upload_files"
 
 def flash(request: Request, error: str) -> None:
