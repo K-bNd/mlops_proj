@@ -1,13 +1,12 @@
 import os
 
-from fastapi import FastAPI, Request, File, UploadFile
-from fastapi.responses import RedirectResponse, FileResponse
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from starlette.background import BackgroundTask
 from starlette.middleware.sessions import SessionMiddleware
 from pydantic import BaseModel
 
-from app_utils import Settings, allowed_extension, download_file, flash
+from app_utils import Settings, allowed_extension, download_file
 from transcript import Transcript
 
 app = FastAPI()
@@ -36,11 +35,7 @@ def root() -> FileResponse:
 def get_transcript(request: Request, param: Param):
     """Get transcript"""
     if not allowed_extension(param.file):
-        print(param.file)
-        err = BackgroundTask(
-            flash, request, "Unallowed extension for audio file")
-        return RedirectResponse(url="/", status_code=302, background=err)
-
+        raise HTTPException(status_code=422, detail="Unallowed extension for audio file")
     filename = os.path.join(settings.upload_folder,
                             param.file.rsplit('/', maxsplit=1)[-1])
 
@@ -54,9 +49,7 @@ def get_transcript(request: Request, param: Param):
 def write_subtitles(request: Request, param: Param):
     """Write subtitles for file"""
     if not allowed_extension(param.file):
-        err = BackgroundTask(
-            flash, request, "Unallowed extension for audio file")
-        return RedirectResponse(url="/", status_code=302, background=err)
+        raise HTTPException(status_code=422, detail="Unallowed extension for audio file")
 
     filename = os.path.join(settings.upload_folder,
                             param.file.rsplit('/', maxsplit=1)[-1])
@@ -68,8 +61,3 @@ def write_subtitles(request: Request, param: Param):
         filename, subtitles_src)
     os.remove(filename)
     return subtitles_src
-
-@app.get('/test')
-async def get_upload_file(file: UploadFile):
-    download_file_obj(file)
-    return {"filename": file.filename}
