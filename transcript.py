@@ -1,5 +1,4 @@
 import concurrent.futures
-from typing import Dict, List
 import deepl
 import torch
 from faster_whisper import WhisperModel
@@ -28,7 +27,7 @@ class Transcript:
         self.spoken_lang = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    def get_transcript(self, audio_file, debug=False) -> Dict:
+    def get_transcript(self, audio_file, debug=False) -> dict:
         """Get transcript from audio file."""
         if self.transcript is not None:
             return self.transcript
@@ -52,7 +51,7 @@ class Transcript:
             {"segments": segments, "text": transcript, "info": info})
         return self.transcript
 
-    def get_subtitles(self, transcript=None, given_segments=None, debug=False) -> List[Dict]:
+    def get_subtitles(self, transcript=None, given_segments=None, debug=False) -> list[dict]:
         """Get subtitles from audio in dict format.
 
         @param transcript : The transcript we are using (could be translated)

@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
@@ -32,7 +32,7 @@ def root() -> FileResponse:
     return FileResponse(path="./static/index.html", media_type="text/html")
 
 @app.get('/transcript')
-def get_transcript(request: Request, param: Param):
+def get_transcript(param: Param):
     """Get transcript"""
     if not allowed_extension(param.file):
         raise HTTPException(status_code=422, detail="Unallowed extension for audio file")
@@ -46,7 +46,7 @@ def get_transcript(request: Request, param: Param):
 
 
 @app.get('/subtitles', response_class=FileResponse)
-def write_subtitles(request: Request, param: Param):
+def write_subtitles(param: Param):
     """Write subtitles for file"""
     if not allowed_extension(param.file):
         raise HTTPException(status_code=422, detail="Unallowed extension for audio file")
