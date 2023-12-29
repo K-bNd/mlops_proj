@@ -46,7 +46,7 @@ USER appuser
 COPY --chown=user . .
 
 # Expose the port that the application listens on.
-EXPOSE 80
+EXPOSE 5000
 
 # Run the application.
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0" , "--reload", "--port", "5000"]
