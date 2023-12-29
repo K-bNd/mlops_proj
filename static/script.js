@@ -1,20 +1,48 @@
-const textGenForm = document.querySelector(".whisper-gen-form");
+function transcribeAudio() {
+    // Get audio URL from the form
+    const audioUrl = document.getElementById('audioUrl').value;
 
-const get_transcript = async (text) => {
-  const inferResponse = await fetch(`/transcript`, {
-    method: "GET",
-    body: {"file": text}, 
-  });
-  const inferJson = await inferResponse.json();
+    // Get the uploaded audio file
+    const audioFile = document.getElementById('audioFile').files[0];
 
-  return inferJson.output;
-};
+    // Check if either audio URL or file is provided
+    if (!audioUrl && !audioFile) {
+        alert('Please provide either an audio URL or upload a file.');
+        return;
+    }
 
-textGenForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+    if (audioUrl && audioFile) {
+        alert('Please provide only one of audio URL or file.');
+        return;
+    }
 
-  const audioGenInput = document.getElementById("audio-gen-input");
-  const textGenParagraph = document.querySelector(".text-gen-output");
+    const formData = new FormData();
 
-  textGenParagraph.textContent = await get_transcript(audioGenInput.value);
-});
+    if (audioFile) {
+        formData.append('audioFile', audioFile);
+    }
+
+    const endpoint = audioUrl ? `/url_transcript` : '/file_transcript';
+    const data = audioUrl ? JSON.stringify({ file: audioUrl }) : formData;
+    // Make a request to the FastAPI endpoint
+
+    fetch(endpoint, {
+        method: 'GET',
+        body: formData,
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Update the result in the #transcription-result div
+            document.getElementById('transcription-result').innerText = `Transcription: ${data.transcript}`;
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+            // Handle error, e.g., display an error message
+            document.getElementById('transcription-result').innerText = 'Error transcribing audio';
+        });
+}

@@ -17,6 +17,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # the application crashes without emitting any logs due to buffering.
 ENV PYTHONUNBUFFERED=1
 
+
 WORKDIR /app
 
 # Create a non-privileged user that the app will run under.
@@ -36,7 +37,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install --no-cache-dir --upgrade -r requirements.txt
 
-RUN mkdir upload_files
+RUN mkdir upload_files && chown appuser upload_files
 
 # Switch to the non-privileged user to run the application.
 USER appuser
@@ -45,7 +46,7 @@ USER appuser
 COPY --chown=user . .
 
 # Expose the port that the application listens on.
-EXPOSE 5000
+EXPOSE 80
 
 # Run the application.
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0" , "--reload", "--port", "80"]

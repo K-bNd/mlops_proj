@@ -126,5 +126,4 @@ class WriteVTT(SubtitlesWriter):
         """Add new write_result."""
         print("WEBVTT\n", file=file)
         for start, end, text in self.iterate_result(result, options):
-            print(f"{start} --> {end} align:middle\n{text}\n",
-                  file=file, flush=True)
+            print(f"{start} --> {end} align:middle\n{text}\n", file=file, flush=True)
