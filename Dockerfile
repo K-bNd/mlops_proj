@@ -49,4 +49,4 @@ COPY --chown=user . .
 EXPOSE 80
 
 # Run the application.
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0" , "--reload", "--port", "80"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0" , "--reload", "--port", "5000"]
