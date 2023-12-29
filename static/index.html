@@ -30,9 +30,9 @@
 
         <!-- Allow users to upload their own audio files -->
         <label for="audioFile">Upload Audio File:</label>
-        <input type="file" id="audioFile" name="audioFile" accept="audio/*">
+        <input type="file" id="audioFile" name="audioFile" accept=".mp3, .mp4, audio/*, video/*">
 
-        <button type="button" onclick="transcribeAudio()">Transcribe</button>
+        <button id="submit" type="button" onclick="transcribeAudio()">Transcribe</button>
       </form>
 
       <div id="transcription-result">
@@ -44,8 +44,6 @@
   <footer>
     <p>&copy; Audio Transcription using Whisper</p>
   </footer>
-
-  <script src="script.js"></script>
 </body>
 
 </html>
