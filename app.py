@@ -32,7 +32,7 @@ def root() -> FileResponse:
     return FileResponse(path="/app/static/index.html", media_type="text/html")
 
 
-@app.get("/file_transcript")
+@app.post("/file_transcript")
 def get_transcript(request: Request, file: UploadFile):
     """Get transcript"""
     if not allowed_extension(file.filename):
@@ -43,7 +43,7 @@ def get_transcript(request: Request, file: UploadFile):
     return obj.get_transcript(file.file)["text"]
 
 
-@app.get("/url_transcript")
+@app.post("/url_transcript")
 def get_transcript(request: Request, param: Param):
     """Get transcript"""
     if not allowed_extension(param.file):

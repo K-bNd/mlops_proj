@@ -28,7 +28,7 @@ function transcribeAudio() {
     // Make a request to the FastAPI endpoint
 
     fetch("http://localhost:7860" + endpoint, {
-        method: 'GET',
+        method: 'POST',
         body: data,
     })
         .then(response => {
