@@ -48,7 +48,7 @@ function transcribeAudio() {
         })
 }
 
-const transcriptionForm = document.querySelector(".submit")
+const transcriptionForm = document.querySelector(".transcription-form")
 transcriptionForm.addEventListener("submit", (e) => {
     e.preventDefault();
     console.log("Transcribing audio...");
