@@ -5,7 +5,7 @@ function transcribeAudio() {
 
     // Get the uploaded audio file
     const audioFile = document.getElementById('audioFile').files[0]
-
+    console.log(document.getElementById('audioFile').files);
     // Check if either audio URL or file is provided
     if (!audioUrl && !audioFile) {
         alert('Please provide either an audio URL or upload a file.')
@@ -20,10 +20,10 @@ function transcribeAudio() {
     const formData = new FormData()
 
     if (audioFile) {
-        formData.append('audioFile', audioFile)
+        formData.append('file', audioFile)
     }
 
-    const endpoint = audioUrl ? `test` : `file_transcript`
+    const endpoint = audioUrl ? `url_transcript` : `file_transcript`
     const data = audioUrl ? JSON.stringify({ file: audioUrl }) : formData
     // Make a request to the FastAPI endpoint
 
