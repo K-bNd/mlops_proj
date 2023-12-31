@@ -31,9 +31,9 @@ def root() -> FileResponse:
     """Show home page."""
     return FileResponse(path="/app/static/index.html", media_type="text/html")
 
-@app.post("/piss")
-def piss():
-    return "piss"
+@app.post("/test")
+def test():
+    return {"Hello": "World!"}
 
 @app.post("/file_transcript")
 def get_transcript(request: Request, file: UploadFile):

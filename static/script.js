@@ -23,7 +23,7 @@ function transcribeAudio() {
         formData.append('audioFile', audioFile)
     }
 
-    const endpoint = audioUrl ? `piss` : `file_transcript`
+    const endpoint = audioUrl ? `test` : `file_transcript`
     const data = audioUrl ? JSON.stringify({ file: audioUrl }) : formData
     // Make a request to the FastAPI endpoint
 
@@ -32,6 +32,7 @@ function transcribeAudio() {
         body: data,
     })
         .then(response => {
+            console.log(response)
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -39,7 +40,7 @@ function transcribeAudio() {
         })
         .then(data => {
             // Update the result in the #transcription-result div
-            document.getElementById('transcription-result').innerText = `Transcription: ${data.transcript}`
+            document.getElementById('transcription-result').innerText = `Transcription: ${data}`
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error)
