@@ -23,7 +23,7 @@ function transcribeAudio() {
         formData.append('audioFile', audioFile)
     }
 
-    const endpoint = audioUrl ? `url_transcript` : `file_transcript`
+    const endpoint = audioUrl ? `piss` : `file_transcript`
     const data = audioUrl ? JSON.stringify({ file: audioUrl }) : formData
     // Make a request to the FastAPI endpoint
 
