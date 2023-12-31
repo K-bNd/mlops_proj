@@ -29,7 +29,7 @@ function transcribeAudio() {
 
     fetch("http://localhost:7860" + endpoint, {
         method: 'GET',
-        body: formData,
+        body: data,
     })
         .then(response => {
             if (!response.ok) {
