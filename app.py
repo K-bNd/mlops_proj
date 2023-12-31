@@ -33,7 +33,7 @@ def root() -> FileResponse:
 
 @app.post("/test")
 def test():
-    return {"Hello": "World!"}
+    return "Hello World!"
 
 @app.post("/file_transcript")
 def get_transcript(request: Request, file: UploadFile):

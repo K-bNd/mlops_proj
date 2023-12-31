@@ -32,6 +32,7 @@ function transcribeAudio() {
         body: data,
     })
         .then(response => {
+            console.log(data);
             console.log(response)
             if (!response.ok) {
                 throw new Error('Network response was not ok');
