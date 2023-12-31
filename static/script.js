@@ -5,7 +5,6 @@ function transcribeAudio() {
 
     // Get the uploaded audio file
     const audioFile = document.getElementById('audioFile').files[0]
-    console.log(document.getElementById('audioFile').files);
     // Check if either audio URL or file is provided
     if (!audioUrl && !audioFile) {
         alert('Please provide either an audio URL or upload a file.')

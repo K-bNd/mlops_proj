@@ -7,7 +7,7 @@
 ARG PYTHON_VERSION=3.11.5
 FROM python:${PYTHON_VERSION}-slim as base
 
-RUN apt-get update && apt-get install -y pkg-config libavcodec-dev libavdevice-dev \
+RUN apt-get update && apt-get install -y pkg-config nvidia-cudnn libavcodec-dev libavdevice-dev \
     libavfilter-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev  && rm -rf /var/lib/apt/lists/*
 
 # Prevents Python from writing pyc files.
