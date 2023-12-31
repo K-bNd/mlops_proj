@@ -26,13 +26,13 @@
       <form id="transcription-form" enctype="multipart/form-data">
         <!-- Allow users to input audio URL -->
         <label for="audioUrl">Audio URL:</label>
-        <input type="text" id="audioUrl" name="audioUrl" required>
+        <input type="text" id="audioUrl" name="audioUrl">
 
         <!-- Allow users to upload their own audio files -->
         <label for="audioFile">Upload Audio File:</label>
         <input type="file" id="audioFile" name="audioFile" accept=".mp3, .mp4, audio/*, video/*">
 
-        <button id="submit" type="button">Transcribe</button>
+        <input type="submit" value="Transcribe">
       </form>
 
       <div id="transcription-result">
