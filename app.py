@@ -31,7 +31,7 @@ def root() -> FileResponse:
     """Show home page."""
     return FileResponse(path="/app/static/index.html", media_type="text/html")
 
-@app.get("/piss")
+@app.post("/piss")
 def piss():
     return "piss"
 
