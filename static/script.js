@@ -27,7 +27,7 @@ function transcribeAudio() {
     const data = audioUrl ? JSON.stringify({ file: audioUrl }) : formData
     // Make a request to the FastAPI endpoint
 
-    fetch(endpoint, {
+    fetch("http://localhost:7860" + endpoint, {
         method: 'GET',
         body: formData,
     })
