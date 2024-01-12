@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
@@ -25,6 +25,8 @@ class Param(BaseModel):
     """Define param class"""
     file: str
 
+def remove_file(path: str) -> None:
+    os.remove(path)
 
 @app.get('/')
 def root() -> FileResponse:
@@ -32,7 +34,7 @@ def root() -> FileResponse:
     return FileResponse(path="./static/index.html", media_type="text/html")
 
 @app.get('/transcript')
-def get_transcript(param: Param):
+def get_transcript(param: Param, background_tasks: BackgroundTasks):
     """Get transcript"""
     if not allowed_extension(param.file):
         raise HTTPException(status_code=422, detail="Unallowed extension for audio file")
@@ -40,13 +42,12 @@ def get_transcript(param: Param):
                             param.file.rsplit('/', maxsplit=1)[-1])
 
     download_file(param.file, filename)
-    res = obj.get_transcript(filename)["text"]
-    os.remove(filename)
-    return res
+    background_tasks.add_task(remove_file, filename)
+    return obj.get_transcript(filename)["text"] 
 
 
 @app.get('/subtitles', response_class=FileResponse)
-def write_subtitles(param: Param):
+def write_subtitles(param: Param, background_tasks: BackgroundTasks):
     """Write subtitles for file"""
     if not allowed_extension(param.file):
         raise HTTPException(status_code=422, detail="Unallowed extension for audio file")
@@ -59,5 +60,6 @@ def write_subtitles(param: Param):
 
     obj.write_subtitles(
         filename, subtitles_src)
-    os.remove(filename)
+    background_tasks.add_task(remove_file, filename)
+    background_tasks.add_task(remove_file, subtitles_src)
     return subtitles_src
