@@ -2,7 +2,6 @@ import os
 import re
 from typing import Optional, TextIO
 from faster_whisper.utils import format_timestamp
-from faster_whisper.transcribe import Segment, Word
 
 
 class ResultWriter:
@@ -126,5 +125,4 @@ class WriteVTT(SubtitlesWriter):
         """Add new write_result."""
         print("WEBVTT\n", file=file)
         for start, end, text in self.iterate_result(result, options):
-            print(f"{start} --> {end} align:middle\n{text}\n",
-                  file=file, flush=True)
+            print(f"{start} --> {end} align:middle\n{text}\n", file=file, flush=True)
