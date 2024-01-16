@@ -3,6 +3,7 @@ import deepl
 import torch
 from faster_whisper import WhisperModel
 from faster_whisper.transcribe import Segment
+import logging
 
 from subtitle_utils import WriteVTT
 
@@ -15,7 +16,7 @@ class Transcript:
     :type deepl_key: str
     """
 
-    def __init__(self, deepl_key) -> None:
+    def __init__(self, deepl_key, debug=False) -> None:
         """Init function.
 
         @param audio_file : The audio filename
@@ -28,10 +29,13 @@ class Transcript:
         self.spoken_lang = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    def get_transcript(self, audio_file, debug=False) -> Dict:
+        if debug:
+            logging.basicConfig()
+            logging.getLogger("faster-whisper").setLevel(logging.DEBUG)
+
+
+    def get_transcript(self, audio_file, debug=False) -> dict:
         """Get transcript from audio file."""
-        if self.transcript is not None:
-            return self.transcript
 
         model = WhisperModel("base", device=self.device, compute_type="int8")
         segments, info = model.transcribe(audio_file, vad_filter=True)
