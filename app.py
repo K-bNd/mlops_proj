@@ -1,7 +1,7 @@
 import os
 from urllib.error import URLError
 
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
@@ -26,6 +26,8 @@ class Param(BaseModel):
 
     file: str
 
+def remove_file(path: str) -> None:
+    os.remove(path)
 
 def remove_file(path: str) -> None:
     """Remove file from disk"""
