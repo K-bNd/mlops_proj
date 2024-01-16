@@ -8,6 +8,7 @@ ALLOWED_EXTENSIONS = {'mp3', 'm4a', 'mp4', 'mov'}
 
 def allowed_extension(filename: str) -> bool:
     """Check if the extension from the uploaded file is valid."""
+    print(filename)
     return '.' in filename and \
            filename.rsplit('.', 1)[-1].lower() in ALLOWED_EXTENSIONS
 
@@ -18,7 +19,8 @@ def download_file(url: str, filename: str) -> None:
 
 def download_file_obj(file: UploadFile) -> None:
     """Downloads a file from UploadFile into a file."""
-    with open(file.filename, 'wb') as f:
+    settings = Settings()
+    with open(os.path.join(settings.upload_folder, file.filename), 'wb') as f:
             copyfileobj(file.file, f)
 
 class Settings(BaseSettings):

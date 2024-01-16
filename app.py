@@ -52,11 +52,8 @@ def write_subtitles(param: Param, background_tasks: BackgroundTasks):
     if not allowed_extension(param.file):
         raise HTTPException(status_code=422, detail="Unallowed extension for audio file")
 
-    filename = os.path.join(settings.upload_folder,
-                            param.file.rsplit('/', maxsplit=1)[-1])
+    filename = os.path.join(settings.upload_folder, file.filename)
     subtitles_src = ".".join(filename.split('.')[0:-1]) + "-subtitles.vtt"
-
-    download_file(param.file, filename)
 
     obj.write_subtitles(
         filename, subtitles_src)
