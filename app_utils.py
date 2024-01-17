@@ -11,10 +11,19 @@ def allowed_extension(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[-1].lower() in ALLOWED_EXTENSIONS
 
 
-def download_file(url: str, filename: str) -> None:
+def download_file(url: str, filename: str) -> str:
     """Downloads a file from url into a file."""
-    with urlopen(url) as in_stream, open(filename, "wb+") as out_file:
+    r = urlopen(url)
+    if r.url != url:
+        raise ValueError("Download error, failed to download content")
+
+    with r as in_stream, open(filename, "wb+") as out_file:
         copyfileobj(in_stream, out_file)
+
+    if not os.path.exists(filename):
+        raise FileNotFoundError("File could be not created")
+
+    return os.path.abspath(filename)
 
 
 class Settings(BaseSettings):

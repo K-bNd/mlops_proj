@@ -38,7 +38,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install --no-cache-dir --upgrade -r requirements.txt
 
 RUN mkdir upload_files && chown appuser upload_files
-ENV LD_LIBRARY_PATH=`python3 -c 'import os; import nvidia.cublas.lib; import nvidia.cudnn.lib; print(os.path.dirname(nvidia.cublas.lib.__file__) + ":" + os.path.dirname(nvidia.cudnn.lib.__file__))'`
 
 # Switch to the non-privileged user to run the application.
 USER appuser

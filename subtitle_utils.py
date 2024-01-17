@@ -2,7 +2,6 @@ import os
 import re
 from typing import Optional, TextIO
 from faster_whisper.utils import format_timestamp
-from faster_whisper.transcribe import Segment, Word
 
 
 class ResultWriter:
