@@ -38,7 +38,7 @@ def root() -> FileResponse:
     return FileResponse(path="./static/index.html", media_type="text/html")
 
 
-@app.get("/transcript_url")
+@app.get("/url_transcript")
 def get_transcript_from_url(param: Param, background_tasks: BackgroundTasks):
     """Get transcript"""
     if not allowed_extension(param.file):
@@ -65,7 +65,7 @@ def get_transcript_from_url(param: Param, background_tasks: BackgroundTasks):
     return obj.get_transcript(path)["text"]
 
 
-@app.get("/transcript_file", response_class=FileResponse)
+@app.get("/file_transcript", response_class=FileResponse)
 def write_subtitles(file: UploadFile):
     """Write subtitles for file"""
     if not allowed_extension(file.filename):
