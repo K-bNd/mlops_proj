@@ -2,6 +2,10 @@
 function transcribeAudio() {
     // Get audio URL from the form
     const audioUrl = document.getElementById('audioUrl').value
+    let header = {
+        'Accept': '*/*',
+        "Content-Type": "application/json"
+    }
 
     // Get the uploaded audio file
     const audioFile = document.getElementById('audioFile').files[0]
@@ -13,6 +17,7 @@ function transcribeAudio() {
 
     if (audioUrl && audioFile) {
         alert('Please provide only one of audio URL or file.')
+        document.getElementById("audioFile").value = null
         return
     }
 
@@ -20,14 +25,18 @@ function transcribeAudio() {
 
     if (audioFile) {
         formData.append('file', audioFile)
+        header = {
+            "Accept": "*/*"
+        }
     }
 
     const endpoint = audioUrl ? `url_transcript` : `file_transcript`
-    const data = audioUrl ? JSON.stringify({ file: audioUrl }) : formData
+    const data = audioUrl ? JSON.stringify({ "file" : audioUrl }) : formData
     // Make a request to the FastAPI endpoint
 
     fetch(endpoint, {
         method: 'POST',
+        headers: header,
         body: data,
     })
         .then(response => {
