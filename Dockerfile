@@ -45,8 +45,8 @@ USER appuser
 # Copy the source code into the container.
 COPY --chown=user . .
 
-# Expose the port that the application listens on.
-EXPOSE 7860
+# # Expose the port that the application listens on.
+# EXPOSE 7860
 
-# Run the application.
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0" , "--reload", "--port", "7860"]
+# # Run the application.
+# CMD ["uvicorn", "app:app", "--host", "0.0.0.0" , "--reload", "--port", "7860"]

@@ -6,19 +6,28 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from pydantic import BaseModel
+from prometheus_client import Counter, Summary, make_asgi_app
 
 from app_utils import Settings, allowed_extension, download_file
 from transcript import Transcript
 
-app = FastAPI()
 
+# Create Prometheus metrics
+REQUEST_COUNT = Counter("requests", "Total number of requests")
+LATENCY = Summary("latency", "Time spent processing a request")
+# TEMPERATURE = Gauge("temperature", "Temperature needed for the audio")
+DURATION = Summary("audio_duration", "Length of the audio")
+
+app = FastAPI(debug=False)
+
+metrics_app = make_asgi_app()
 settings = Settings()
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
-
 app.mount("/upload_files", StaticFiles(directory="./upload_files"), name="upload_files")
 app.mount("/static", StaticFiles(directory="./static"), name="static")
+app.mount("/metrics", metrics_app)
 
-obj = Transcript(settings.deepl_key)
+obj = Transcript()
 
 
 class Param(BaseModel):
@@ -32,6 +41,14 @@ def remove_file(path: str) -> None:
     os.remove(path)
 
 
+def log_transcript_information(transcript, latency) -> None:
+    """Log transcript information to prometheus client"""
+    LATENCY.observe(latency)
+    DURATION.observe(transcript["info"].duration)
+    # logprobs = np.array(transcript["avg_logprobs"])
+    # temperatures = np.array(transcript["temperatures"])
+    
+    
 @app.get("/")
 def root() -> FileResponse:
     """Show home page."""
@@ -40,7 +57,8 @@ def root() -> FileResponse:
 
 @app.post("/url_transcript")
 def get_transcript_from_url(param: Param, background_tasks: BackgroundTasks):
-    """Get transcript"""
+    """Get transcript from given url"""
+    REQUEST_COUNT.inc()
     if not allowed_extension(param.file):
         raise HTTPException(
             status_code=422, detail="Unallowed extension for audio file"
@@ -62,14 +80,21 @@ def get_transcript_from_url(param: Param, background_tasks: BackgroundTasks):
         ) from err
 
     background_tasks.add_task(remove_file, path)
-    return obj.get_transcript(path)["text"]
+    transcript, latency = obj.get_transcript(path)
+    log_transcript_information(transcript, latency)
+
+    return transcript["text"]
 
 
 @app.post("/file_transcript")
-def write_subtitles(file: UploadFile):
-    """Write subtitles for file"""
+def get_transcript_from_file(file: UploadFile):
+    """Get transcript from given file"""
+    REQUEST_COUNT.inc()
     if not allowed_extension(file.filename):
         raise HTTPException(
             status_code=422, detail="Unallowed extension for audio file"
         )
-    return obj.get_transcript(file.file)["text"]
+
+    transcript, latency = obj.get_transcript(file.file)
+    log_transcript_information(transcript, latency)
+    return transcript["text"]

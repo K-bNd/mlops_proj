@@ -1,0 +1,9 @@
+apiVersion: 1
+
+datasources:
+- name: Prometheus
+  type: prometheus
+  url: https://prometheus-prod-24-prod-eu-west-2.grafana.net/api/prom
+  isDefault: true
+  access: proxy
+  editable: true

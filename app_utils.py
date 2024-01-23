@@ -35,5 +35,4 @@ class Settings(BaseSettings):
     """
 
     secret_key: str = "dev"
-    deepl_key: str = os.environ.get("DEEPL_KEY", "")
     upload_folder: str = "./upload_files"
