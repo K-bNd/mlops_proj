@@ -18,14 +18,14 @@ LATENCY = Summary("latency", "Time spent processing a request")
 # TEMPERATURE = Gauge("temperature", "Temperature needed for the audio")
 DURATION = Summary("audio_duration", "Length of the audio")
 
-app = FastAPI(debug=False)
+app = FastAPI()
 
 metrics_app = make_asgi_app()
 settings = Settings()
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 app.mount("/upload_files", StaticFiles(directory="./upload_files"), name="upload_files")
 app.mount("/static", StaticFiles(directory="./static"), name="static")
-app.mount("/metrics", metrics_app)
+app.mount("/metrics", metrics_app, "prometheus_metrics")
 
 obj = Transcript()
 
