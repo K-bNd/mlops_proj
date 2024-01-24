@@ -10,7 +10,6 @@
 # scrape_configs:
 #   - job_name: 'app'
 #     honor_timestamps: true
-#     scheme: http
 #     metrics_path: '/metrics'
 #     scrape_interval: 15s
 #     scrape_timeout: 10s
@@ -19,17 +18,16 @@
 #         - localhost:7860
 
 global:
-  scrape_interval: 10s
+  scrape_interval: 15s 
+  scrape_timeout: 10s
 scrape_configs:
-  - job_name: node
-    static_configs:
-      - targets:
-        - localhost:9100
-  - job_name: app
+  - job_name: fastapi
+    scheme: http
     metrics_path: /metrics
+    follow_redirects: true
     static_configs:
-      - targets:
-        - localhost:7860
+    - targets:
+      - 172.17.0.1:7860
 remote_write:
   - url: https://prometheus-prod-24-prod-eu-west-2.grafana.net/api/prom/push
     basic_auth:

@@ -7,30 +7,6 @@
 # You can add other services your application may depend on here, such as a
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
-  # grafana:
-  #   image: grafana/grafana
-  #   container_name: grafana
-  #   ports:
-  #     - 3000:3000
-  #   restart: unless-stopped
-  #   environment:
-  #     - GF_SECURITY_ADMIN_USER=admin
-  #     - GF_SECURITY_ADMIN_PASSWORD=grafana
-  #   volumes:
-  #     - ./grafana:/etc/grafana/provisioning/datasources
-
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: fastapi-application
-  #   depends_on:
-  #     - prometheus
-  #   ports:
-  #     - 7860:7860
-  #   command:
-  #     ["uvicorn", "app:app", "--host", "0.0.0.0", "--reload", "--port", "7860"]
-  #   restart: "no"
 
 services:
   prometheus:
@@ -44,14 +20,6 @@ services:
     volumes:
       - ./prometheus:/etc/prometheus
       - prom_data:/prometheus
-  node-exporter:
-    image: prom/node-exporter
-    container_name: monitoring_node_exporter
-    restart: unless-stopped
-    ports:
-      - 9100:9100
-    expose:
-      - 9100
   app:
     build:
       context: .
