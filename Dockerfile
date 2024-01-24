@@ -14,7 +14,7 @@ COPY prometheus/prometheus.yml /etc/prometheus/prometheus.yml
 # Define the volume for Prometheus data
 VOLUME ["/prometheus"]
 
-RUN apt-get update && apt-get install -y python3 python3-pip pkg-config libavcodec-dev libavdevice-dev \
+RUN apk update && apk install -y python3 python3-pip pkg-config libavcodec-dev libavdevice-dev \
     libavfilter-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev  && rm -rf /var/lib/apt/lists/*
 
 # Prevents Python from writing pyc files.
