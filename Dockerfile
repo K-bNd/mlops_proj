@@ -4,17 +4,21 @@
 # If you need more help, visit the Dockerfile reference guide at
 # https://docs.docker.com/engine/reference/builder/
 
-
-# Use an official Prometheus image as the base image
-FROM prom/prometheus
-
-# Copy the Prometheus configuration file into the container
+# Stage 1: Build Prometheus
+FROM prom/prometheus AS prometheus
 COPY prometheus/prometheus.yml /etc/prometheus/prometheus.yml
 
-# Define the volume for Prometheus data
-VOLUME ["/prometheus"]
+# Stage 2: Build FastAPI application
+FROM python:3.9-alpine
+WORKDIR /app
 
-RUN apk update && apk install -y python3 python3-pip pkg-config libavcodec-dev libavdevice-dev \
+# Define the volume for Prometheus data
+# VOLUME ["/prometheus"]
+
+# Copy Prometheus configuration from the first stage
+COPY --from=prometheus /etc/prometheus/prometheus.yml /etc/prometheus/prometheus.yml
+
+RUN apt-get update && apt-get install -y pkg-config libavcodec-dev libavdevice-dev \
     libavfilter-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev  && rm -rf /var/lib/apt/lists/*
 
 # Prevents Python from writing pyc files.
@@ -23,8 +27,6 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Keeps Python from buffering stdout and stderr to avoid situations where
 # the application crashes without emitting any logs due to buffering.
 ENV PYTHONUNBUFFERED=1
-
-WORKDIR /app
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
