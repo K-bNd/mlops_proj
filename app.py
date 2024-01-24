@@ -1,6 +1,7 @@
 import os
 from urllib.error import URLError
 
+import numpy as np
 from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -15,9 +16,9 @@ from transcript import Transcript
 # Create Prometheus metrics
 REQUEST_COUNT = Counter("requests", "Total number of requests")
 LATENCY = Summary("latency", "Time spent processing a request")
-# TEMPERATURE = Gauge("temperature", "Temperature needed for the audio")
+TEMPERATURE = Summary("temperature", "Temperature needed for the audio")
 DURATION = Summary("audio_duration", "Length of the audio")
-
+LOGPROBS = Summary("max_logprob", "Maximum avg_logprob on audio")
 app = FastAPI()
 
 metrics_app = make_asgi_app()
@@ -45,9 +46,10 @@ def log_transcript_information(transcript, latency) -> None:
     """Log transcript information to prometheus client"""
     LATENCY.observe(latency)
     DURATION.observe(transcript["info"].duration)
-    # logprobs = np.array(transcript["avg_logprobs"])
-    # temperatures = np.array(transcript["temperatures"])
-    
+    logprobs = np.array(transcript["avg_logprobs"])
+    temperatures = np.array(transcript["temperatures"])
+    TEMPERATURE.observe(np.median(temperatures))
+    LOGPROBS.observe(np.max(logprobs))
     
 @app.get("/")
 def root() -> FileResponse:
