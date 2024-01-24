@@ -4,10 +4,17 @@
 # If you need more help, visit the Dockerfile reference guide at
 # https://docs.docker.com/engine/reference/builder/
 
-ARG PYTHON_VERSION=3.11.5
-FROM python:${PYTHON_VERSION}-slim as base
 
-RUN apt-get update && apt-get install -y pkg-config libavcodec-dev libavdevice-dev \
+# Use an official Prometheus image as the base image
+FROM prom/prometheus
+
+# Copy the Prometheus configuration file into the container
+COPY prometheus/prometheus.yml /etc/prometheus/prometheus.yml
+
+# Define the volume for Prometheus data
+VOLUME ["/prometheus"]
+
+RUN apt-get update && apt-get install -y python3 python3-pip pkg-config libavcodec-dev libavdevice-dev \
     libavfilter-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev  && rm -rf /var/lib/apt/lists/*
 
 # Prevents Python from writing pyc files.
@@ -16,7 +23,6 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Keeps Python from buffering stdout and stderr to avoid situations where
 # the application crashes without emitting any logs due to buffering.
 ENV PYTHONUNBUFFERED=1
-
 
 WORKDIR /app
 
@@ -45,8 +51,8 @@ USER appuser
 # Copy the source code into the container.
 COPY --chown=user . .
 
-# # Expose the port that the application listens on.
-# EXPOSE 7860
+# Define the Prometheus port and the FastAPI port.
+EXPOSE 9090 7860
 
-# # Run the application.
-# CMD ["uvicorn", "app:app", "--host", "0.0.0.0" , "--reload", "--port", "7860"]
+# Command to start both Prometheus and the FastAPI application
+CMD ["sh", "-c", "prometheus --config.file=/etc/prometheus/prometheus.yml & uvicorn app:app --host 0.0.0.0 --reload --port 7860"]
