@@ -50,4 +50,4 @@ COPY --chown=user . .
 EXPOSE 7860 9090
 
 # Run the application.
-CMD ["./prometheus-2.49.1.linux-amd64/prometheus", "--config.file=./prometheus.yml", "&&", "uvicorn", "app:app", "--host", "0.0.0.0" , "--reload", "--port", "7860"]
+CMD ["./prometheus-2.49.1.linux-amd64/prometheus", "--config.file=./prometheus/prometheus.yml", "&&", "uvicorn", "app:app", "--host", "0.0.0.0" , "--reload", "--port", "7860"]
