@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from pydantic import BaseModel
-from prometheus_client import Counter, Summary, make_asgi_app
+from prometheus_client import Counter, Summary,Gauge, make_asgi_app
 
 from app_utils import Settings, allowed_extension, download_file
 from transcript import Transcript
@@ -18,7 +18,7 @@ REQUEST_COUNT = Counter("requests", "Total number of requests")
 LATENCY = Summary("latency", "Time spent processing a request")
 TEMPERATURE = Summary("temperature", "Temperature needed for the audio")
 DURATION = Summary("audio_duration", "Length of the audio")
-LOGPROBS = Summary("max_logprob", "Maximum avg_logprob on audio")
+LOGPROBS = Gauge("max_logprob", "Maximum avg_logprob on audio")
 app = FastAPI()
 
 metrics_app = make_asgi_app()
@@ -49,7 +49,7 @@ def log_transcript_information(transcript, latency) -> None:
     logprobs = np.array(transcript["avg_logprobs"])
     temperatures = np.array(transcript["temperatures"])
     TEMPERATURE.observe(np.median(temperatures))
-    LOGPROBS.observe(np.max(logprobs))
+    LOGPROBS.set(np.max(logprobs))
     
 @app.get("/")
 def root() -> FileResponse:

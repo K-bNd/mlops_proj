@@ -7,10 +7,8 @@
 ARG PYTHON_VERSION=3.11.5
 FROM python:${PYTHON_VERSION}-slim as base
 
-RUN apt-get update && apt-get install -y wget pkg-config libavcodec-dev libavdevice-dev \
+RUN apt-get update && apt-get install -y pkg-config libavcodec-dev libavdevice-dev \
     libavfilter-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev  && rm -rf /var/lib/apt/lists/*
-
-RUN wget https://github.com/prometheus/prometheus/releases/download/v2.49.1/prometheus-2.49.1.linux-amd64.tar.gz && tar xvfz prometheus-2.49.1.linux-amd64.tar.gz
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -46,8 +44,8 @@ USER appuser
 # Copy the source code into the container.
 COPY --chown=user . .
 
-# # Expose the port that the application listens on.
-EXPOSE 7860 9090
+# Expose the port that the application listens on.
+# EXPOSE 7860 9090
 
-# Run the application.
-CMD ["./prometheus-2.49.1.linux-amd64/prometheus", "--config.file=./prometheus/prometheus.yml", "&&", "uvicorn", "app:app", "--host", "0.0.0.0" , "--reload", "--port", "7860"]
+# # Run the application.
+# CMD ["./prometheus-2.49.1.linux-amd64/prometheus", "--config.file=./prometheus/prometheus.yml", "&&", "uvicorn", "app:app", "--host", "0.0.0.0" , "--reload", "--port", "7860"]
